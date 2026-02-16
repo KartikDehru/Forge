@@ -54,3 +54,4 @@ Open the same document in two browser tabs while signed in as different demo use
 ## License
 
 MIT (sample project).
+<!-- progress: refactor: extract mention utility helpers -->
