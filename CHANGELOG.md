@@ -5,3 +5,4 @@
 - 2026-02-14: fix: persist issue board column order
 - 2026-02-16: refactor: extract mention utility helpers
 - 2026-02-17: refactor: tidy store selectors
+- 2026-02-17: docs: expand README with collab demo steps
