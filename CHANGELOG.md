@@ -6,3 +6,4 @@
 - 2026-02-16: refactor: extract mention utility helpers
 - 2026-02-17: refactor: tidy store selectors
 - 2026-02-17: docs: expand README with collab demo steps
+- 2026-02-20: chore: add public brand icon
