@@ -9,3 +9,4 @@
 - 2026-02-20: chore: add public brand icon
 - 2026-02-20: feat: improve empty states on boards
 - 2026-02-21: feat: tighten keyboard navigation in palette
+- 2026-02-22: perf: debounce localStorage snapshots
