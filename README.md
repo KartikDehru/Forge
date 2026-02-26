@@ -57,3 +57,5 @@ MIT (sample project).
 <!-- progress: refactor: extract mention utility helpers -->
 
 <!-- progress: feat: improve empty states on boards -->
+
+<!-- progress: style: refine issue priority chips -->
