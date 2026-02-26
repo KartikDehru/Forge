@@ -12,3 +12,4 @@
 - 2026-02-22: perf: debounce localStorage snapshots
 - 2026-02-24: fix: guard missing page ids
 - 2026-02-26: style: refine issue priority chips
+- 2026-02-26: chore: bump package metadata
