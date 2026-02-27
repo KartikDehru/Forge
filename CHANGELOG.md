@@ -13,3 +13,4 @@
 - 2026-02-24: fix: guard missing page ids
 - 2026-02-26: style: refine issue priority chips
 - 2026-02-26: chore: bump package metadata
+- 2026-02-27: docs: document presence multi-tab testing
