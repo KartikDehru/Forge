@@ -1,38 +1,44 @@
 "use client";
 
+import { forwardRef, type ButtonHTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
-import type { ButtonHTMLAttributes } from "react";
 
 type Variant = "primary" | "secondary" | "ghost" | "danger";
+type Size = "sm" | "md" | "icon";
 
 const variants: Record<Variant, string> = {
-  primary: "bg-accent text-white hover:bg-accent-muted",
-  secondary:
-    "bg-surface-elevated border border-surface-border text-zinc-100 hover:bg-zinc-800",
-  ghost: "text-zinc-300 hover:bg-surface-elevated",
-  danger: "bg-red-600/90 text-white hover:bg-red-600",
+  primary: "bg-accent text-accent-ink hover:bg-accent-strong font-semibold",
+  secondary: "border border-line-strong bg-raised text-ink hover:bg-overlay",
+  ghost: "text-ink-muted hover:bg-overlay hover:text-ink",
+  danger: "border border-danger/40 bg-danger/10 text-danger hover:bg-danger/20",
 };
 
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+const sizes: Record<Size, string> = {
+  sm: "h-7 gap-1.5 px-2.5 text-xs",
+  md: "h-8 gap-2 px-3 text-sm",
+  icon: "h-7 w-7 text-sm",
+};
+
+export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant;
-  size?: "sm" | "md";
+  size?: Size;
 }
 
-export function Button({
-  className,
-  variant = "primary",
-  size = "md",
-  ...props
-}: ButtonProps) {
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
+  { className, variant = "primary", size = "md", type = "button", ...props },
+  ref
+) {
   return (
     <button
+      ref={ref}
+      type={type}
       className={cn(
-        "inline-flex items-center justify-center rounded-lg font-medium transition-colors disabled:opacity-50",
-        size === "sm" ? "px-2.5 py-1.5 text-xs" : "px-3 py-2 text-sm",
+        "inline-flex shrink-0 select-none items-center justify-center rounded-md font-medium transition-colors duration-100 disabled:pointer-events-none disabled:opacity-45",
+        sizes[size],
         variants[variant],
         className
       )}
       {...props}
     />
   );
-}
+});

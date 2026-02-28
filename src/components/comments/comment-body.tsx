@@ -1,21 +1,16 @@
 "use client";
 
+import { useMemo } from "react";
 import type { User } from "@/types";
-import { parseMentionSegments } from "@/lib/mentions";
+import { parseMentionSegments } from "@/domain/mentions";
 
-interface CommentBodyProps {
-  body: string;
-  users: User[];
-}
-
-export function CommentBody({ body, users }: CommentBodyProps) {
-  const segments = parseMentionSegments(body, users);
-
+export function CommentBody({ body, users }: { body: string; users: User[] }) {
+  const segments = useMemo(() => parseMentionSegments(body, users), [body, users]);
   return (
-    <p className="whitespace-pre-wrap text-sm text-zinc-200">
+    <p className="whitespace-pre-wrap break-words text-sm leading-relaxed text-ink">
       {segments.map((seg, i) =>
         seg.type === "mention" ? (
-          <span key={i} className="rounded bg-accent/20 px-1 text-accent">
+          <span key={i} className="rounded bg-accent/15 px-1 font-medium text-accent">
             @{seg.value}
           </span>
         ) : (

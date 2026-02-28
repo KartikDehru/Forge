@@ -1,42 +1,34 @@
-import { cn } from "@/lib/utils";
+import { cn, initialsOf } from "@/lib/utils";
+import { readableOn } from "@/lib/color";
 
 interface AvatarProps {
   name: string;
   color: string;
-  size?: "sm" | "md" | "lg";
-  online?: boolean;
+  size?: "xs" | "sm" | "md" | "lg";
   className?: string;
 }
 
 const sizes = {
-  sm: "h-6 w-6 text-[10px]",
-  md: "h-8 w-8 text-xs",
-  lg: "h-10 w-10 text-sm",
+  xs: "h-4 w-4 text-[8px]",
+  sm: "h-5 w-5 text-[9px]",
+  md: "h-6 w-6 text-2xs",
+  lg: "h-8 w-8 text-xs",
 };
 
-export function Avatar({ name, color, size = "md", online, className }: AvatarProps) {
-  const initials = name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-
+export function Avatar({ name, color, size = "md", className }: AvatarProps) {
   return (
-    <span className={cn("relative inline-flex shrink-0", className)}>
-      <span
-        className={cn(
-          "inline-flex items-center justify-center rounded-full font-semibold text-white ring-2 ring-surface",
-          sizes[size]
-        )}
-        style={{ backgroundColor: color }}
-        title={name}
-      >
-        {initials}
-      </span>
-      {online && (
-        <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-surface bg-emerald-400" />
+    <span
+      role="img"
+      aria-label={name}
+      title={name}
+      className={cn(
+        "inline-flex shrink-0 select-none items-center justify-center rounded font-semibold",
+        sizes[size],
+        className
       )}
+      style={{ backgroundColor: color, color: readableOn(color) }}
+    >
+      {initialsOf(name)}
     </span>
   );
 }

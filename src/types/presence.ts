@@ -1,13 +1,16 @@
+export interface PresenceCursor {
+  blockId?: string;
+  /** Caret / selection start inside the block's text. */
+  offset?: number;
+  /** Selection end; equals `offset` when the selection is collapsed. */
+  selectionEnd?: number;
+}
+
 export interface PresenceUser {
   clientId: string;
   userId: string;
   name: string;
   avatarColor: string;
-  cursor?: { blockId?: string; offset?: number };
+  cursor?: PresenceCursor;
   lastSeen: number;
-}
-
-export interface AwarenessState {
-  roomId: string;
-  peers: PresenceUser[];
 }

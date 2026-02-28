@@ -1,67 +1,117 @@
 "use client";
 
-import { useEffect } from "react";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { useEffect, useMemo } from "react";
+import { FilePlus2, FileText } from "lucide-react";
+import { useCan, useRole } from "@/hooks/use-session";
+import { formatRelativeTime, pluralize } from "@/lib/utils";
+import { useUiStore } from "@/store/ui-store";
 import { useWorkspaceStore } from "@/store/workspace-store";
-import { Card } from "@/components/ui/card";
 import { IssueBoard } from "@/components/issues/issue-board";
-import { formatRelativeTime } from "@/lib/utils";
+import { MissingState, NoAccessState } from "@/components/layout/state-views";
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 
-interface PageProps {
-  params: { projectId: string };
-}
-
-export default function ProjectPage({ params }: PageProps) {
+export default function ProjectPage({ params }: { params: { projectId: string } }) {
   const project = useWorkspaceStore((s) => s.projects.find((p) => p.id === params.projectId));
-  const pages = useWorkspaceStore((s) => s.pages.filter((p) => p.projectId === params.projectId));
+  const allPages = useWorkspaceStore((s) => s.pages);
+  const issues = useWorkspaceStore((s) => s.issues);
+  const users = useWorkspaceStore((s) => s.users);
   const setActiveProject = useWorkspaceStore((s) => s.setActiveProject);
+  const openCreatePage = useUiStore((s) => s.openCreatePage);
+  const role = useRole(project?.workspaceId);
+  const canCreatePage = useCan("page.create", project?.workspaceId);
 
   useEffect(() => {
-    if (project) setActiveProject(project.id);
-  }, [project, setActiveProject]);
+    if (project && role) setActiveProject(project.id);
+  }, [project, role, setActiveProject]);
 
-  if (!project) {
-    notFound();
-  }
+  const pages = useMemo(
+    () =>
+      allPages
+        .filter((p) => p.projectId === params.projectId)
+        .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)),
+    [allPages, params.projectId]
+  );
+  const issueCount = useMemo(
+    () => issues.filter((i) => i.projectId === params.projectId).length,
+    [issues, params.projectId]
+  );
+
+  if (!project) return <MissingState what="project" />;
+  if (!role) return <NoAccessState what="project" />;
 
   return (
     <div>
-      <section className="border-b border-surface-border p-6">
-        <div className="mb-2 flex items-center gap-2">
-          <span
-            className="h-3 w-3 rounded-full"
-            style={{ backgroundColor: project.color }}
-          />
-          <h1 className="text-2xl font-semibold">{project.name}</h1>
+      <section className="border-b border-line px-6 py-5">
+        <div className="mx-auto flex max-w-6xl items-start justify-between gap-6">
+          <div>
+            <div className="flex items-center gap-2.5">
+              <span className="h-3 w-3 rounded-[3px]" style={{ backgroundColor: project.color }} aria-hidden="true" />
+              <h1 className="text-xl font-semibold tracking-tight">{project.name}</h1>
+              <span className="font-mono text-xs text-ink-subtle">{project.key}</span>
+            </div>
+            <p className="mt-1.5 max-w-xl text-sm text-ink-muted">{project.description}</p>
+          </div>
+          <p className="shrink-0 text-xs text-ink-subtle">
+            {pluralize(pages.length, "page")} · {pluralize(issueCount, "issue")}
+          </p>
         </div>
-        <p className="text-sm text-zinc-400">{project.description}</p>
       </section>
 
-      <section className="grid gap-4 p-6 lg:grid-cols-2">
-        <Card className="p-4">
-          <h2 className="mb-3 text-sm font-semibold text-zinc-300">Documents</h2>
-          <ul className="space-y-2">
+      <section aria-labelledby="project-pages" className="mx-auto max-w-6xl px-6 py-5">
+        <div className="mb-2.5 flex items-center justify-between">
+          <h2 id="project-pages" className="text-sm font-semibold">
+            Pages
+          </h2>
+          {canCreatePage && (
+            <Button size="sm" variant="secondary" onClick={() => openCreatePage(project.id)}>
+              <FilePlus2 className="h-3.5 w-3.5" aria-hidden="true" />
+              New page
+            </Button>
+          )}
+        </div>
+        {pages.length === 0 ? (
+          <EmptyState
+            compact
+            icon={FileText}
+            title="No pages yet"
+            description="Pages hold specs, notes and decisions next to the issues they drive."
+            action={
+              canCreatePage ? (
+                <Button size="sm" onClick={() => openCreatePage(project.id)}>
+                  Create the first page
+                </Button>
+              ) : undefined
+            }
+          />
+        ) : (
+          <ul className="overflow-hidden rounded-lg border border-line">
             {pages.map((page) => (
-              <li key={page.id}>
+              <li key={page.id} className="border-b border-line last:border-b-0">
                 <Link
                   href={`/pages/${page.id}`}
-                  className="flex items-center justify-between rounded-lg px-2 py-2 text-sm hover:bg-surface-elevated"
+                  className="flex items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-overlay/60"
                 >
-                  <span>
-                    {page.icon} {page.title}
-                  </span>
-                  <span className="text-xs text-zinc-500">
-                    {formatRelativeTime(page.updatedAt)}
+                  <FileText className="h-3.5 w-3.5 text-ink-subtle" aria-hidden="true" />
+                  <span className="flex-1 truncate font-medium">{page.title}</span>
+                  <span className="text-xs text-ink-subtle">
+                    {users.find((u) => u.id === page.updatedBy)?.name} · {formatRelativeTime(page.updatedAt)}
                   </span>
                 </Link>
               </li>
             ))}
           </ul>
-        </Card>
-        <Card className="overflow-hidden p-0">
-          <IssueBoard projectId={project.id} />
-        </Card>
+        )}
+      </section>
+
+      <section aria-labelledby="project-issues" className="border-t border-line">
+        <h2 id="project-issues" className="sr-only">
+          Issues
+        </h2>
+        <div className="h-[34rem]">
+          <IssueBoard projectId={project.id} embedded />
+        </div>
       </section>
     </div>
   );

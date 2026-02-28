@@ -1,48 +1,44 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { YjsRoom } from "@/lib/collab/yjs-room";
-import type { PresenceUser } from "@/types";
-import { useAuthStore } from "@/store/auth-store";
+import { useCallback, useEffect, useState } from "react";
+import type { PresenceCursor, PresenceUser } from "@/types";
+import { acquireRoom } from "@/lib/collab/room-registry";
+import type { YjsRoom } from "@/lib/collab/yjs-room";
+import type { ConnectionStatus } from "@/lib/collab/transport";
+import { useCurrentUser } from "@/hooks/use-session";
 
 export function useCollabRoom(roomId: string | null) {
-  const user = useAuthStore((s) => s.user);
+  const user = useCurrentUser();
+  const userId = user?.id;
+  const userName = user?.name;
+  const avatarColor = user?.avatarColor;
   const [room, setRoom] = useState<YjsRoom | null>(null);
   const [peers, setPeers] = useState<PresenceUser[]>([]);
-  const [connected, setConnected] = useState(false);
+  const [status, setStatus] = useState<ConnectionStatus>("connecting");
 
   useEffect(() => {
-    if (!roomId || !user) {
+    if (!roomId || !userId || !userName || !avatarColor) {
       setRoom(null);
       setPeers([]);
-      setConnected(false);
       return;
     }
-
-    const instance = new YjsRoom({
-      roomId,
-      userId: user.id,
-      userName: user.name,
-      avatarColor: user.avatarColor,
-    });
-    instance.connect();
-    setRoom(instance);
-    setConnected(true);
-
-    const unsub = instance.subscribePeers(setPeers);
-
+    const handle = acquireRoom({ roomId, userId, userName, avatarColor });
+    setRoom(handle.room);
+    const offPeers = handle.room.subscribePeers(setPeers);
+    const offStatus = handle.room.subscribeStatus(setStatus);
     return () => {
-      unsub();
-      instance.disconnect();
+      offPeers();
+      offStatus();
+      handle.release();
       setRoom(null);
-      setConnected(false);
     };
-  }, [roomId, user]);
+  }, [roomId, userId, userName, avatarColor]);
 
-  return {
-    room,
-    peers,
-    connected,
-    setCursor: (cursor: PresenceUser["cursor"]) => room?.setCursor(cursor),
-  };
+  const setCursor = useCallback(
+    (cursor: PresenceCursor | undefined) => room?.setCursor(cursor),
+    [room]
+  );
+  const reconnect = useCallback(() => room?.reconnect(), [room]);
+
+  return { room, peers, status, setCursor, reconnect };
 }

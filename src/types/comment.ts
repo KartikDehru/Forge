@@ -1,5 +1,6 @@
 export interface Comment {
   id: string;
+  workspaceId: string;
   entityType: "issue" | "page";
   entityId: string;
   authorId: string;
@@ -7,9 +8,4 @@ export interface Comment {
   mentions: string[];
   createdAt: string;
   updatedAt: string;
-}
-
-export interface MentionPayload {
-  userId: string;
-  displayName: string;
 }

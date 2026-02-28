@@ -14,7 +14,10 @@ export interface DocumentBlock {
   type: BlockType;
   content: string;
   checked?: boolean;
+  /** Position in the flat, depth-first ordered list. */
   order: number;
+  /** Nesting level. 0 is top level; a block may be at most one deeper than the block before it. */
+  depth: number;
 }
 
 export interface DocumentPage {
@@ -22,8 +25,8 @@ export interface DocumentPage {
   projectId: string;
   workspaceId: string;
   title: string;
-  icon: string;
   blocks: DocumentBlock[];
+  createdAt: string;
   updatedAt: string;
   updatedBy: string;
 }

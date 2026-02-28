@@ -3,7 +3,6 @@ export interface User {
   name: string;
   email: string;
   avatarColor: string;
-  role: "owner" | "member" | "guest";
 }
 
 export interface Session {
